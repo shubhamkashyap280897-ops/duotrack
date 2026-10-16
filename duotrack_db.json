@@ -1,0 +1,92 @@
+{
+  "profiles": {
+    "u1": {
+      "id": "u1",
+      "name": "Shubham",
+      "avatar": "🚀"
+    },
+    "u2": {
+      "id": "u2",
+      "name": "Java",
+      "avatar": "🎯"
+    }
+  },
+  "activities": [
+    {
+      "id": "act_1",
+      "title": "30m Walk/Jog",
+      "category": "fitness",
+      "icon": "🏃‍♂️",
+      "desc": "At least 30 mins cardio or strength",
+      "createdAt": "2026-01-01"
+    },
+    {
+      "id": "act_2",
+      "title": "Read 20 Pages",
+      "category": "learning",
+      "icon": "📚",
+      "desc": "Non-fiction book or tech articles",
+      "createdAt": "2026-01-01"
+    },
+    {
+      "id": "act_3",
+      "title": "Drink 2.5L Water",
+      "category": "lifestyle",
+      "icon": "💧",
+      "desc": "Stay hydrated throughout the day",
+      "createdAt": "2026-01-01"
+    },
+    {
+      "id": "act_4",
+      "title": "1 Hour Deep Work / Skill Building",
+      "category": "productivity",
+      "icon": "⚡",
+      "desc": "No phone distractions",
+      "createdAt": "2026-01-01"
+    },
+    {
+      "id": "act_1792160464596",
+      "title": "Read 10 pages",
+      "category": "learning",
+      "icon": "⚡",
+      "desc": "",
+      "createdAt": "2026-10-16"
+    },
+    {
+      "id": "act_1792160634096",
+      "title": "45 minutes gym",
+      "category": "fitness",
+      "icon": "⚡",
+      "desc": "",
+      "createdAt": "2026-10-16"
+    }
+  ],
+  "checkins": {
+    "2026-10-16": {
+      "act_1": {
+        "u1": true,
+        "u2": true
+      },
+      "act_3": {
+        "u1": true,
+        "u2": true
+      },
+      "act_1792160464596": {
+        "u1": true,
+        "u2": false
+      },
+      "act_2": {
+        "u1": true,
+        "u2": true
+      },
+      "act_1792160634096": {
+        "u1": true,
+        "u2": true
+      },
+      "act_4": {
+        "u1": true,
+        "u2": true
+      }
+    }
+  }
+}

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0f19" id="metaThemeColor">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DuoTrack">
+  <title>DuoTrack - Daily Activity & Habit Tracker for Friends</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- Canvas Confetti for celebration animations -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+</head>
+<body class="theme-dark">
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo">
+          <span class="logo-icon">⚡</span>
+          <div class="logo-text">
+            <h1>DuoTrack</h1>
+            <p class="tagline">Daily Accountability with Friends</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <span class="live-status-pill" id="liveStatusPill" title="Sync Status">
+          <span class="status-dot"></span>
+          <span id="liveStatusText">Local</span>
+        </span>
+        <button id="themeToggleBtn" class="btn-icon" title="Toggle Dark/Light Mode">
+          <span id="themeIcon">☀️</span>
+        </button>
+        <button id="profileSettingsBtn" class="btn-secondary" title="Edit Profiles">
+          <span>👥 Profiles</span>
+        </button>
+        <button id="backupModalBtn" class="btn-secondary" title="Export / Import Data">
+          <span>💾 Backup</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Top Stats & Synergy Banner -->
+    <section class="synergy-banner">
+      <div class="synergy-card">
+        <div class="synergy-header">
+          <span class="fire-icon">🔥</span>
+          <h3>Duo Synergy Streak</h3>
+          <span class="badge badge-accent" id="synergyBadge">Synced Power</span>
+        </div>
+        <div class="synergy-body">
+          <div class="streak-number" id="duoStreakCount">0</div>
+          <div class="streak-label">consecutive days both completed all goals</div>
+        </div>
+      </div>
+
+      <!-- User 1 Card -->
+      <div class="user-summary-card" id="user1Card">
+        <div class="user-card-header">
+          <div class="user-avatar-wrap">
+            <span class="user-avatar" id="u1AvatarPreview">🚀</span>
+          </div>
+          <div class="user-info">
+            <h4 id="u1NamePreview">User 1</h4>
+            <div class="user-streak">Streak: <strong id="u1Streak">0 days</strong> 🔥</div>
+          </div>
+          <div class="user-percent" id="u1ProgressPct">0%</div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar u1-bar" id="u1ProgressBar" style="width: 0%"></div>
+        </div>
+        <div class="user-meta" id="u1Meta">0 of 0 completed</div>
+      </div>
+
+      <!-- User 2 Card -->
+      <div class="user-summary-card" id="user2Card">
+        <div class="user-card-header">
+          <div class="user-avatar-wrap">
+            <span class="user-avatar" id="u2AvatarPreview">🎯</span>
+          </div>
+          <div class="user-info">
+            <h4 id="u2NamePreview">User 2</h4>
+            <div class="user-streak">Streak: <strong id="u2Streak">0 days</strong> 🔥</div>
+          </div>
+          <div class="user-percent" id="u2ProgressPct">0%</div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar u2-bar" id="u2ProgressBar" style="width: 0%"></div>
+        </div>
+        <div class="user-meta" id="u2Meta">0 of 0 completed</div>
+      </div>
+    </section>
+
+    <!-- Date Navigation Toolbar -->
+    <div class="date-toolbar">
+      <div class="date-controls">
+        <button id="prevDayBtn" class="btn-icon" title="Previous Day">◀</button>
+        <div class="date-display-box">
+          <span class="calendar-icon">📅</span>
+          <span id="dateDisplayFormatted">Today</span>
+          <input type="date" id="datePickerInput" class="hidden-date-picker">
+        </div>
+        <button id="nextDayBtn" class="btn-icon" title="Next Day">▶</button>
+        <button id="todayBtn" class="btn-pill" title="Jump to Today">Today</button>
+      </div>
+
+      <div class="view-toggles">
+        <label class="view-label">View:</label>
+        <div class="segmented-control">
+          <button class="segment-btn active" data-view="duo">Duo (Side-by-Side)</button>
+          <button class="segment-btn" data-view="u1" id="filterU1Btn">User 1</button>
+          <button class="segment-btn" data-view="u2" id="filterU2Btn">User 2</button>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button id="addActivityBtn" class="btn-primary">
+          <span>+ Add Activity</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Motivational Nudge Bar -->
+    <div class="nudge-bar" id="nudgeBar">
+      <span class="nudge-emoji">💬</span>
+      <span class="nudge-text" id="nudgeText">Ready to conquer today together? Check off your habits below!</span>
+      <button class="btn-text-action" id="randomNudgeBtn">🎲 Nudge Friend</button>
+    </div>
+
+    <!-- Activities Table / List -->
+    <main class="activities-wrapper">
+      <div class="table-container">
+        <table class="activity-table">
+          <thead>
+            <tr>
+              <th class="col-activity">Daily Habit / Activity</th>
+              <th class="col-category">Category</th>
+              <th class="col-check u1-col" id="colHeaderU1">
+                <span class="header-avatar" id="colU1Avatar">🚀</span>
+                <span id="colU1Name">User 1</span>
+              </th>
+              <th class="col-check u2-col" id="colHeaderU2">
+                <span class="header-avatar" id="colU2Avatar">🎯</span>
+                <span id="colU2Name">User 2</span>
+              </th>
+              <th class="col-status">Status</th>
+              <th class="col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="activityTableBody">
+            <!-- Dynamically populated rows -->
+          </tbody>
+        </table>
+
+        <!-- Empty State -->
+        <div class="empty-state hidden" id="emptyState">
+          <div class="empty-icon">📝</div>
+          <h3>No activities scheduled yet</h3>
+          <p>Add your first daily habit to start holding each other accountable!</p>
+          <button class="btn-primary" id="emptyAddBtn">+ Add Activity</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Weekly Consistency Heatmap/Grid -->
+    <section class="weekly-history-card">
+      <div class="section-header">
+        <h3>📊 Past 7 Days Accountability Log</h3>
+        <span class="section-sub">Quick view of how consistent you both were this week</span>
+      </div>
+      <div class="weekly-grid" id="weeklyGrid">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>DuoTrack • Stay consistent, motivate each other, win every day 🏆</p>
+      <div class="footer-links">
+        <span id="totalHabitsCount">0 habits tracked</span> • 
+        <span id="storageSize">Local Storage synced</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- MODAL: Add/Edit Activity -->
+  <div class="modal-overlay hidden" id="activityModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="activityModalTitle">Add New Activity</h3>
+        <button class="close-modal-btn" data-close="activityModal">&times;</button>
+      </div>
+      <form id="activityForm">
+        <input type="hidden" id="activityId">
+        
+        <div class="form-group">
+          <label for="actTitle">Activity Title *</label>
+          <div class="input-with-icon">
+            <input type="text" id="actTitle" placeholder="e.g. 45 Min Gym Workout, Read 20 pages" required autofocus>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group half">
+            <label for="actCategory">Category</label>
+            <select id="actCategory">
+              <option value="fitness">💪 Fitness & Health</option>
+              <option value="learning">📚 Learning & Books</option>
+              <option value="mindfulness">🧘 Mindfulness & Rest</option>
+              <option value="productivity">⚡ Productivity & Work</option>
+              <option value="lifestyle">🌱 Lifestyle & Routine</option>
+              <option value="other">✨ Other</option>
+            </select>
+          </div>
+
+          <div class="form-group half">
+            <label for="actIcon">Icon / Emoji</label>
+            <input type="text" id="actIcon" placeholder="e.g. 🏃‍♂️, 📖, 💧" maxlength="4">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="actDesc">Description / Daily Goal (Optional)</label>
+          <input type="text" id="actDesc" placeholder="e.g. Minimum 3 sets or 20 minutes before 9 PM">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" data-close="activityModal">Cancel</button>
+          <button type="submit" class="btn-primary" id="saveActivityBtn">Save Activity</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Profiles Customization -->
+  <div class="modal-overlay hidden" id="profileModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Customize Friend Profiles</h3>
+        <button class="close-modal-btn" data-close="profileModal">&times;</button>
+      </div>
+      <form id="profileForm">
+        <div class="profile-config-section">
+          <h4>👤 You (User 1)</h4>
+          <div class="form-row">
+            <div class="form-group half">
+              <label for="u1NameInput">Name</label>
+              <input type="text" id="u1NameInput" required maxlength="20">
+            </div>
+            <div class="form-group half">
+              <label for="u1AvatarInput">Avatar Emoji</label>
+              <input type="text" id="u1AvatarInput" required maxlength="4">
+            </div>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="profile-config-section">
+          <h4>👥 Your Friend (User 2)</h4>
+          <div class="form-row">
+            <div class="form-group half">
+              <label for="u2NameInput">Friend's Name</label>
+              <input type="text" id="u2NameInput" required maxlength="20">
+            </div>
+            <div class="form-group half">
+              <label for="u2AvatarInput">Avatar Emoji</label>
+              <input type="text" id="u2AvatarInput" required maxlength="4">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" data-close="profileModal">Cancel</button>
+          <button type="submit" class="btn-primary">Save Profiles</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Backup / Export / Import -->
+  <div class="modal-overlay hidden" id="backupModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Backup & Sync Data</h3>
+        <button class="close-modal-btn" data-close="backupModal">&times;</button>
+      </div>
+      <div class="backup-content">
+        <p class="backup-desc">
+          Export your tracked data as a JSON file to share with your friend or transfer between devices.
+        </p>
+
+        <div class="backup-box">
+          <div class="backup-box-title">📤 Export Data</div>
+          <p>Download a snapshot of all habits, streaks, and check-in history.</p>
+          <button class="btn-primary" id="exportDataBtn">Download Backup (.json)</button>
+        </div>
+
+        <div class="backup-box">
+          <div class="backup-box-title">📥 Import / Restore Data</div>
+          <p>Load habits & history from a friend's backup or an earlier save.</p>
+          <input type="file" id="importFileInput" accept=".json" style="display:none">
+          <button class="btn-secondary" id="triggerImportBtn">Choose JSON File to Import</button>
+        </div>
+
+        <div class="backup-box danger-zone">
+          <div class="backup-box-title">⚠️ Reset Data</div>
+          <p>Reset tracker to initial sample habits and clear logs.</p>
+          <button class="btn-danger" id="resetDataBtn">Reset to Sample Data</button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" data-close="backupModal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Referee Mascot: Ref Ellie the Elephant 🐘 -->
+  <div class="referee-widget" id="refereeWidget" title="Tap Ref Ellie for referee commentary!">
+    <div class="referee-bubble" id="refereeBubble">
+      <span class="referee-whistle-badge">🏁 REF</span>
+      <span class="referee-speech-text" id="refereeSpeechText">Ref Ellie here! Ready to referee today's match! Tap me anytime! 🐘</span>
+    </div>
+    <div class="referee-avatar-body" id="refereeAvatarBody">
+      <svg class="referee-svg" viewBox="0 0 100 105" width="76" height="80" xmlns="http://www.w3.org/2000/svg">
+        <!-- Shadow -->
+        <ellipse cx="50" cy="98" rx="28" ry="6" fill="rgba(0,0,0,0.25)" />
+        
+        <!-- Left Ear -->
+        <g class="ref-ear ref-ear-left">
+          <ellipse cx="20" cy="46" rx="16" ry="20" fill="#94a3b8" transform="rotate(-15 20 46)" />
+          <ellipse cx="20" cy="46" rx="10" ry="14" fill="#f472b6" opacity="0.65" transform="rotate(-15 20 46)" />
+        </g>
+        
+        <!-- Right Ear -->
+        <g class="ref-ear ref-ear-right">
+          <ellipse cx="80" cy="46" rx="16" ry="20" fill="#94a3b8" transform="rotate(15 80 46)" />
+          <ellipse cx="80" cy="46" rx="10" ry="14" fill="#f472b6" opacity="0.65" transform="rotate(15 80 46)" />
+        </g>
+
+        <!-- Body / Referee Striped Shirt -->
+        <path d="M 32 68 Q 50 64 68 68 L 74 95 Q 50 100 26 95 Z" fill="#ffffff" stroke="#1e293b" stroke-width="2" />
+        <!-- Referee Stripes -->
+        <path d="M 39 67 L 37 96" stroke="#0f172a" stroke-width="4" stroke-linecap="round" />
+        <path d="M 50 66 L 50 97" stroke="#0f172a" stroke-width="4.5" stroke-linecap="round" />
+        <path d="M 61 67 L 63 96" stroke="#0f172a" stroke-width="4" stroke-linecap="round" />
+
+        <!-- Head -->
+        <ellipse cx="50" cy="48" rx="27" ry="25" fill="#a5b4fc" />
+        <ellipse cx="50" cy="48" rx="26" ry="24" fill="#818cf8" opacity="0.4" />
+
+        <!-- Rosy Cheeks -->
+        <ellipse cx="32" cy="56" rx="5" ry="3" fill="#f43f5e" opacity="0.45" />
+        <ellipse cx="68" cy="56" rx="5" ry="3" fill="#f43f5e" opacity="0.45" />
+
+        <!-- Cute Kawaii Eyes -->
+        <ellipse cx="36" cy="44" rx="4.5" ry="6" fill="#0f172a" />
+        <circle cx="34.5" cy="42" r="2" fill="#ffffff" />
+        <circle cx="37.5" cy="46" r="1" fill="#ffffff" />
+
+        <ellipse cx="64" cy="44" rx="4.5" ry="6" fill="#0f172a" />
+        <circle cx="62.5" cy="42" r="2" fill="#ffffff" />
+        <circle cx="65.5" cy="46" r="1" fill="#ffffff" />
+
+        <!-- Elephant Trunk with Golden Whistle -->
+        <g class="ref-trunk">
+          <!-- Trunk Curve -->
+          <path d="M 46 54 Q 44 68 53 73 Q 62 76 64 68 Q 63 60 54 62" 
+                fill="none" stroke="#6366f1" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M 46 54 Q 44 68 53 73 Q 62 76 64 68 Q 63 60 54 62" 
+                fill="none" stroke="#818cf8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+          
+          <!-- Golden Whistle held in trunk -->
+          <g class="ref-whistle" transform="translate(60, 62) rotate(15)">
+            <rect x="0" y="0" width="12" height="6" rx="2" fill="#fbbf24" stroke="#d97706" stroke-width="1" />
+            <circle cx="10" cy="3" r="4" fill="#f59e0b" stroke="#d97706" stroke-width="1" />
+            <circle cx="10" cy="3" r="1.5" fill="#78350f" />
+            <line x1="-3" y1="3" x2="0" y2="3" stroke="#475569" stroke-width="1" />
+            <!-- Whistle Sound Puffs -->
+            <path class="whistle-puff" d="M -5 -2 Q -8 -4 -9 -1" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round" />
+            <path class="whistle-puff" d="M -6 6 Q -9 8 -10 5" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round" />
+          </g>
+        </g>
+
+        <!-- Referee Cap -->
+        <path d="M 30 32 Q 50 16 70 32 Z" fill="#0f172a" />
+        <ellipse cx="50" cy="32" rx="21" ry="5" fill="#1e293b" />
+        <!-- Cap Visor -->
+        <path d="M 33 32 Q 50 38 67 32" stroke="#0f172a" stroke-width="3" fill="none" stroke-linecap="round" />
+        <!-- Cap Whistle/Badge emblem -->
+        <circle cx="50" cy="24" r="3.5" fill="#f59e0b" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

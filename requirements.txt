@@ -1,0 +1,2 @@
+# DuoTrack uses Python's built-in standard library (http.server, json, os)
+# No external pip dependencies needed!
